@@ -50,7 +50,7 @@ For the Appplication to work properly at port 3000.
 
 The Appplication will work properly and will fetch data from the 'json-server'
 we just initialised
-## Guide
+
 # Guided by: 
 ### Prof. Jogesh Muppala 
 > Associate Professor at Hong Kong University of Science and Technology
