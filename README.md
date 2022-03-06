@@ -1,71 +1,57 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# React-Restaurant-App with Local Backend
 
-## Available Scripts
+This is a React application which is succesfully able to communicate between server and client.
 
-In the project directory, you can run:
+This is a Restaurant Application.
 
-### `npm start`
+Features:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+    1. Data loads from the local server initiallised using JSON server
+    2. Can Fetch login details, Contact details after the user input.
+    3. Uses:
+        "react"- Front-end JavaScript library
+        
+        "react-dom"-  Provides DOM-specific methods
+        "react-redux"- Allows React components to read data
+        "react-route"- Standard library for routing in React.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+        "react-transition-group"- Front-end Transitions
+        "react-animation-components"- Front-end Animations
+        "reactstrap"- React component library for Bootstrap
 
-### `npm test`
+        "web-vitals"-Set of useful metrics that aim to capture the user experience of a web page
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Starting your JSON server
 
-### `npm run build`
+In the 'json-server' directory type:
+```
+json-server --watch db.json -d 2000 -p 3001
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+`--watch` Initialises the JSON server, Creates demo REST JSON webservice
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`-d`  Provides a delay of 2000ms
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+`-p` Port used will be 3001
+## Running your React App
 
-### `npm run eject`
+Go to your Project Directory and type:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+npm start
+```
+or 
+```
+yarn start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+For the Appplication to work properly at port 3000.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# Course
+The Appplication will work properly and will fetch data from the 'json-server'
+we just initialised
+## Guide
+# Guided by: 
+### Prof. Jogesh Muppala 
+> Associate Professor at Hong Kong University of Science and Technology
+    
