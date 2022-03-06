@@ -1,20 +1,23 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import { Navbar,NavbarBrand } from 'reactstrap';
+import Main from './components/MainComponent';
 import './App.css';
+import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { ConfigureStore } from './redux/configureStore';
 
-class App extends Component{
-  render(){
+const store = ConfigureStore();
+
+class App extends Component {
+  render() {
     return (
-      <div className='App'>
-        <Navbar dark color="primary">
-          <div className="container">
-            <NavbarBrand href="/">
-              Restaurant of the Fusion
-            </NavbarBrand>
+      <Provider store={store}>
+        <BrowserRouter>
+          <div className="App">
+            <Main />
           </div>
-          </Navbar>
-      </div>
+        </BrowserRouter>
+      </Provider>
+      
     );
   }
 }
