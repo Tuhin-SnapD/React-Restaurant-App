@@ -1,20 +1,21 @@
 import React, { Component } from 'react';
-import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem, Jumbotron,
-    Button, Modal, ModalHeader, ModalBody,
-    Form, FormGroup, Input, Label } from 'reactstrap';
+import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem } from 'reactstrap';
 import { NavLink } from 'react-router-dom';
+import { 
+    FaHome, 
+    FaInfoCircle, 
+    FaUtensils, 
+    FaPhone
+} from 'react-icons/fa';
 
 class Header extends Component {
     constructor(props) {
         super(props);
     
         this.toggleNav = this.toggleNav.bind(this);
-        this.toggleModal = this.toggleModal.bind(this);
-        this.handleLogin = this.handleLogin.bind(this);
 
         this.state = {
-          isNavOpen: false,
-          isModalOpen: false
+          isNavOpen: false
         };
       }
 
@@ -24,85 +25,50 @@ class Header extends Component {
         });
       }
 
-      toggleModal() {
-        this.setState({
-          isModalOpen: !this.state.isModalOpen
-        });
-      }
-
-      handleLogin(event) {
-        this.toggleModal();
-        alert("Username: " + this.username.value + " Password: " + this.password.value
-            + " Remember: " + this.remember.checked);
-        event.preventDefault();
-
-    }
-
     render() {
         return(
             <div>
-                <Navbar dark expand="md">
+                <Navbar dark expand="md" className="navbar-sophisticated">
                     <div className="container">
-                        <NavbarToggler onClick={this.toggleNav} />
-                        <NavbarBrand className="mr-auto" href="/"><img src='assets/images/logo.png' height="30" width="41" alt='Ristorante Con Fusion' /></NavbarBrand>
-                        <Collapse isOpen={this.state.isNavOpen} navbar>
-                            <Nav navbar>
-                            <NavItem>
-                                <NavLink className="nav-link"  to='/home'><span className="fa fa-home fa-lg"></span> Home</NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link" to='/aboutus'><span className="fa fa-info fa-lg"></span> About Us</NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link"  to='/menu'><span className="fa fa-list fa-lg"></span> Menu</NavLink>
-                            </NavItem>
-                            <NavItem>
-                                <NavLink className="nav-link" to='/contactus'><span className="fa fa-address-card fa-lg"></span> Contact Us</NavLink>
-                            </NavItem>
-                            </Nav>
-                            <Nav className="ml-auto" navbar>
+                        <NavbarToggler onClick={this.toggleNav} className="navbar-toggler-custom" />
+                        <NavbarBrand className="navbar-brand-sophisticated" href="/">
+                            <div className="brand-container">
+                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=120&h=60&fit=crop" 
+                                     height="40" width="50" alt="L'Etoile Restaurant" 
+                                     className="brand-logo" />
+                                <span className="brand-text">L'Étoile</span>
+                            </div>
+                        </NavbarBrand>
+                        <Collapse isOpen={this.state.isNavOpen} navbar className="navbar-collapse-sophisticated">
+                            <Nav navbar className="navbar-nav-sophisticated">
                                 <NavItem>
-                                    <Button outline onClick={this.toggleModal}><span className="fa fa-sign-in fa-lg"></span> Login</Button>
+                                    <NavLink className="nav-link-sophisticated" to='/home'>
+                                        <FaHome className="nav-icon" />
+                                        <span className="nav-text">Home</span>
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className="nav-link-sophisticated" to='/aboutus'>
+                                        <FaInfoCircle className="nav-icon" />
+                                        <span className="nav-text">About Us</span>
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className="nav-link-sophisticated" to='/menu'>
+                                        <FaUtensils className="nav-icon" />
+                                        <span className="nav-text">Menu</span>
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink className="nav-link-sophisticated" to='/contactus'>
+                                        <FaPhone className="nav-icon" />
+                                        <span className="nav-text">Contact Us</span>
+                                    </NavLink>
                                 </NavItem>
                             </Nav>
                         </Collapse>
                     </div>
                 </Navbar>
-                <Jumbotron>
-                    <div className="container">
-                        <div className="row row-header">
-                            <div className="col-12 col-sm-6">
-                                <h1>Ristorante con Fusion</h1>
-                                <p>We take inspiration from the World's best cuisines, and create a unique fusion experience. Our lipsmacking creations will tickle your culinary senses!</p>
-                            </div>
-                        </div>
-                    </div>
-                </Jumbotron>
-                <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
-                    <ModalHeader toggle={this.toggleModal}>Login</ModalHeader>
-                    <ModalBody>
-                    <Form onSubmit={this.handleLogin}>
-                            <FormGroup>
-                                <Label htmlFor="username">Username</Label>
-                                <Input type="text" id="username" name="username"
-                                    innerRef={(input) => this.username = input} />
-                            </FormGroup>
-                            <FormGroup>
-                                <Label htmlFor="password">Password</Label>
-                                <Input type="password" id="password" name="password"
-                                    innerRef={(input) => this.password = input}  />
-                            </FormGroup>
-                            <FormGroup check>
-                                <Label check>
-                                    <Input type="checkbox" name="remember"
-                                    innerRef={(input) => this.remember = input}  />
-                                    Remember me
-                                </Label>
-                            </FormGroup>
-                            <Button type="submit" value="submit" color="primary">Login</Button>
-                        </Form>                    
-                    </ModalBody>
-                </Modal>
             </div>
         );
     }
