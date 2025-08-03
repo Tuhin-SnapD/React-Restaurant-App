@@ -2,10 +2,14 @@
 
 A sophisticated, modern React application for a fine dining restaurant with elegant UI/UX design, Redux state management, and seamless user interactions.
 
+![Landing Page](landing.png)
+
 ![React](https://img.shields.io/badge/React-17.0.2-blue.svg)
 ![Redux](https://img.shields.io/badge/Redux-4.0.5-purple.svg)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-4.0.0-7952B3.svg)
 ![React Router](https://img.shields.io/badge/React%20Router-5.3.4-red.svg)
+
+**🌐 GitHub Repository:** [https://github.com/Tuhin-SnapD/React-Restaurant-App](https://github.com/Tuhin-SnapD/React-Restaurant-App)
 
 ## ✨ Features
 
@@ -44,8 +48,8 @@ A sophisticated, modern React application for a fine dining restaurant with eleg
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/react-restaurant-app.git
-   cd react-restaurant-app
+   git clone https://github.com/Tuhin-SnapD/React-Restaurant-App.git
+   cd React-Restaurant-App
    ```
 
 2. **Install dependencies**
