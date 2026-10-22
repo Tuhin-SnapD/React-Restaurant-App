@@ -19,19 +19,29 @@ const Contact = (props) => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [feedbackType, setFeedbackType] = useState('general');
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+    setSubmitError('');
+    setShowSuccess(false);
     try {
-      console.log('Form submitted:', data);
-      // Call the feedback submission function
-      await props.postFeedback(data.firstname, data.lastname, data.telnum, data.email, data.agree, data.contactType, data.message);
+      await props.postFeedback(
+        data.firstname,
+        data.lastname,
+        data.telnum,
+        data.email,
+        data.agree,
+        data.contactType,
+        data.message,
+        feedbackType
+      );
       reset();
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 5000);
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      setSubmitError(error.message || 'Your feedback could not be submitted. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +98,7 @@ const Contact = (props) => {
           </Col>
         </Row>
 
-        {/* Success Alert */}
+        {/* Success / Error Alerts */}
         {showSuccess && (
           <Row className="mb-4">
             <Col>
@@ -98,6 +108,21 @@ const Contact = (props) => {
                   <div className="alert-text">
                     <h5>Thank you for your feedback!</h5>
                     <p>We have received your message and will get back to you soon.</p>
+                  </div>
+                </div>
+              </Alert>
+            </Col>
+          </Row>
+        )}
+        {submitError && (
+          <Row className="mb-4">
+            <Col>
+              <Alert color="danger" className="success-alert-sophisticated">
+                <div className="alert-content">
+                  <FaEnvelopeOpen className="alert-icon" />
+                  <div className="alert-text">
+                    <h5>We could not send your feedback</h5>
+                    <p>{submitError}</p>
                   </div>
                 </div>
               </Alert>

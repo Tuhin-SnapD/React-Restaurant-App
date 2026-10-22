@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardImg, CardText, CardBody, CardTitle, CardSubtitle, Button, Badge, Row, Col, Container } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import { Loading } from './LoadingComponent';
 import { 
     FaUtensils, 
@@ -67,11 +68,18 @@ function RenderCard({ item, isLoading, errMess, type }) {
           
           {item.comments && (
             <div className="rating-stars-sophisticated">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="star-container">
-                  <FaRegStar className="star-sophisticated" />
-                </span>
-              ))}
+              {(() => {
+                const average = item.comments.length > 0
+                  ? item.comments.reduce((sum, comment) => sum + comment.rating, 0) / item.comments.length
+                  : 0;
+                return [...Array(5)].map((_, i) => (
+                  <span key={i} className="star-container">
+                    {i < Math.round(average)
+                      ? <FaStar className="star-sophisticated" />
+                      : <FaRegStar className="star-sophisticated" />}
+                  </span>
+                ));
+              })()}
               <span className="review-count-sophisticated">({item.comments.length} reviews)</span>
             </div>
           )}
@@ -227,10 +235,10 @@ function Home(props) {
                   why we're the city's most celebrated restaurant.
                 </p>
               </div>
-                              <div className="cta-buttons-sophisticated">
-                    <Button color="warning" size="lg" className="cta-button-primary">
+                <div className="cta-buttons-sophisticated">
+                    <Button tag={Link} to="/contactus" color="warning" size="lg" className="cta-button-primary">
                         <FaPhone className="button-icon" />
-                        <span className="button-text">Call to Reserve</span>
+                        <span className="button-text">Contact Us to Reserve</span>
                     </Button>
                 </div>
             </div>

@@ -82,19 +82,36 @@ function RenderMenuItem({ dish, onClick }) {
     );
 }
 
+const categoryMeta = {
+    appetizer: { name: 'Appetizers', icon: <FaUtensils /> },
+    mains: { name: 'Main Courses', icon: <FaDrumstickBite /> },
+    dessert: { name: 'Desserts', icon: <FaBirthdayCake /> },
+    beverage: { name: 'Beverages', icon: <FaUtensils /> }
+};
+
 const Menu = (props) => {
     const [selectedCategory, setSelectedCategory] = useState('all');
-    
+    const allDishes = props.dishes.dishes || [];
+
     const categories = [
         { id: 'all', name: 'All Dishes', icon: <FaUtensils /> },
-        { id: 'appetizer', name: 'Appetizers', icon: <FaUtensils /> },
-        { id: 'mains', name: 'Main Courses', icon: <FaDrumstickBite /> },
-        { id: 'dessert', name: 'Desserts', icon: <FaBirthdayCake /> }
+        ...Array.from(new Set(allDishes.map(dish => dish.category))).map(category => ({
+            id: category,
+            name: (categoryMeta[category] || { name: category }).name,
+            icon: (categoryMeta[category] || { icon: <FaUtensils /> }).icon
+        }))
     ];
-    
-    const filteredDishes = selectedCategory === 'all' 
-        ? props.dishes.dishes 
-        : props.dishes.dishes.filter(dish => dish.category === selectedCategory);
+
+    const filteredDishes = selectedCategory === 'all'
+        ? allDishes
+        : allDishes.filter(dish => dish.category === selectedCategory);
+
+    const ratedDishes = allDishes.filter(dish => dish.comments && dish.comments.length > 0);
+    const averageRating = ratedDishes.length > 0
+        ? (ratedDishes.reduce((total, dish) =>
+            total + dish.comments.reduce((sum, comment) => sum + comment.rating, 0) / dish.comments.length, 0
+          ) / ratedDishes.length).toFixed(1)
+        : '0.0';
 
     const menu = filteredDishes.map((dish) => {
         return (
@@ -142,15 +159,15 @@ const Menu = (props) => {
                             </p>
                             <div className="hero-stats-sophisticated">
                                 <div className="stat-item-sophisticated">
-                                    <span className="stat-number-sophisticated">{props.dishes.dishes.length}</span>
+                                    <span className="stat-number-sophisticated">{allDishes.length}</span>
                                     <span className="stat-label-sophisticated">Signature Dishes</span>
                                 </div>
                                 <div className="stat-item-sophisticated">
-                                    <span className="stat-number-sophisticated">4.9</span>
+                                    <span className="stat-number-sophisticated">{averageRating}</span>
                                     <span className="stat-label-sophisticated">Average Rating</span>
                                 </div>
                                 <div className="stat-item-sophisticated">
-                                    <span className="stat-number-sophisticated">3</span>
+                                    <span className="stat-number-sophisticated">{categories.length - 1}</span>
                                     <span className="stat-label-sophisticated">Categories</span>
                                 </div>
                             </div>
@@ -191,7 +208,7 @@ const Menu = (props) => {
                                     ))}
                                 </div>
                                 <div className="results-count-sophisticated">
-                                    Showing {filteredDishes.length} of {props.dishes.dishes.length} dishes
+                                    Showing {filteredDishes.length} of {allDishes.length} dishes
                                 </div>
                             </div>
                         </Col>
@@ -210,6 +227,10 @@ const Menu = (props) => {
                                 <p className="cta-subtitle-sophisticated">
                                     Our expert staff is here to guide you through our menu and create the perfect dining experience.
                                 </p>
+                                <Button tag={Link} to="/contactus" color="warning" size="lg" className="cta-button-sophisticated">
+                                    <FaSearch className="button-icon" />
+                                    <span className="button-text">Ask Us for a Recommendation</span>
+                                </Button>
                             </div>
                         </Col>
                     </Row>

@@ -1,10 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-    FaGoogle, 
-    FaFacebook, 
     FaLinkedin, 
-    FaTwitter, 
     FaGithub, 
     FaEnvelope,
     FaHome,
@@ -28,19 +25,10 @@ function Footer(props) {
                                 with our award-winning cuisine and impeccable service.
                             </p>
                             <div className="footer-social">
-                                <a className="social-link" href="http://google.com/+" aria-label="Google Plus">
-                                    <FaGoogle className="social-icon" />
-                                </a>
-                                <a className="social-link" href="http://www.facebook.com/profile.php?id=" aria-label="Facebook">
-                                    <FaFacebook className="social-icon" />
-                                </a>
-                                <a className="social-link" href="https://www.linkedin.com/in/tuhin-chakrabarty-1074aa19b/" aria-label="LinkedIn">
+                                <a className="social-link" href="https://www.linkedin.com/in/tuhin-chakrabarty-1074aa19b/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                                     <FaLinkedin className="social-icon" />
                                 </a>
-                                <a className="social-link" href="http://twitter.com/" aria-label="Twitter">
-                                    <FaTwitter className="social-icon" />
-                                </a>
-                                <a className="social-link" href="https://github.com/Tuhin-SnapD" aria-label="GitHub">
+                                <a className="social-link" href="https://github.com/Tuhin-SnapD" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
                                     <FaGithub className="social-icon" />
                                 </a>
                                 <a className="social-link" href="mailto:reservations@letoile.com" aria-label="Email">
@@ -113,15 +101,13 @@ function Footer(props) {
                 <div className="row align-items-center">
                     <div className="col-md-6">
                         <p className="copyright">
-                            © 2024 L'Étoile Restaurant. All rights reserved.
+                            © {new Date().getFullYear()} L'Étoile Restaurant. All rights reserved.
                         </p>
                     </div>
                     <div className="col-md-6 text-md-end">
-                                                    <div className="footer-bottom-links">
-                                <a href="/privacy" className="footer-bottom-link">Privacy Policy</a>
-                                <a href="/terms" className="footer-bottom-link">Terms of Service</a>
-                                <a href="/cookies" className="footer-bottom-link">Cookie Policy</a>
-                            </div>
+                        <div className="footer-bottom-links">
+                            <span className="footer-bottom-link">Fine dining since 2010</span>
+                        </div>
                     </div>
                 </div>
             </div>

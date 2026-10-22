@@ -49,7 +49,7 @@ function About(props) {
       return (
         <div className="leaders-grid-sophisticated">
           {props.leaders.leaders.map((leader) => (
-            <RenderLeader leader={leader} key={leader.id} />
+            <RenderLeader leader={leader} key={leader._id || leader.id} />
           ))}
         </div>
       );

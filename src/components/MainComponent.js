@@ -10,18 +10,15 @@ import { postComment, postFeedback, fetchDishes, fetchPromos, fetchLeaders } fro
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-const mapStateToProps = state => {
-  console.log("mapStateToProps called with state:", state);
-  return {
-    dishes: state.dishes,
-    promotions: state.promotions,
-    leaders: state.leaders
-  }
-}
+const mapStateToProps = state => ({
+  dishes: state.dishes,
+  promotions: state.promotions,
+  leaders: state.leaders
+});
 
 const mapDispatchToProps = dispatch => ({
   postComment: (dishId, rating, author, comment) => dispatch(postComment(dishId, rating, author, comment)),
-  postFeedback: (firstname, lastname, telnum, email, agree, contactType, message) => dispatch(postFeedback(firstname, lastname, telnum, email, agree, contactType, message)),
+  postFeedback: (firstname, lastname, telnum, email, agree, contactType, message, feedbackType) => dispatch(postFeedback(firstname, lastname, telnum, email, agree, contactType, message, feedbackType)),
   fetchDishes: () => {dispatch(fetchDishes())},
   fetchPromos: () => {dispatch(fetchPromos())},
   fetchLeaders: () => {dispatch(fetchLeaders())}
@@ -30,22 +27,17 @@ const mapDispatchToProps = dispatch => ({
 class Main extends Component {
 
   componentDidMount() {
-    console.log("Main component mounted, fetching data...");
     this.props.fetchDishes();
     this.props.fetchPromos();
     this.props.fetchLeaders();
   }
 
   render() {
-    console.log("Main component render called with props:", this.props);
-
     const HomePage = () => {
       // Add safety checks for data
       const featuredDish = this.props.dishes?.dishes?.filter((dish) => dish.featured === true)[0] || null;
       const featuredPromo = this.props.promotions?.promotions?.filter((promo) => promo.featured === true)[0] || null;
       const featuredLeader = this.props.leaders?.leaders?.filter((leader) => leader.featured === true)[0] || null;
-
-      console.log("HomePage - featured items:", { featuredDish, featuredPromo, featuredLeader });
 
       return (
         <Home dish={featuredDish}
@@ -62,16 +54,8 @@ class Main extends Component {
     }
 
     const DishWithId = ( {match} ) => {
-      console.log("DishWithId called with match:", match);
-      console.log("Available dishes:", this.props.dishes?.dishes);
-      
       const dish = this.props.dishes?.dishes?.filter((dish) => dish._id === match.params.dishId)[0] || null;
       const comments = dish?.comments || [];
-
-      console.log("Found dish:", dish);
-      console.log("Comments:", comments);
-      console.log("Comments type:", typeof comments);
-      console.log("Comments is array:", Array.isArray(comments));
 
       return (
         <DishDetail dish={dish}

@@ -16,19 +16,35 @@ import {
 
 const CommentForm = ({ dishId, postComment }) => {
     const [isCommentFormModalOpen, setIsCommentFormModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState(null);
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
     const toggleCommentFormModal = () => {
+        if (!isCommentFormModalOpen) {
+            setSubmitMessage(null);
+        }
         setIsCommentFormModalOpen(!isCommentFormModalOpen);
     };
 
-    const onSubmit = (values) => {
-        console.log("Current State is: " + JSON.stringify(values));
-        postComment(dishId, values.rating, values.author, values.comment);
-        reset();
-        toggleCommentFormModal();
-        // Show success message
-        alert('Thank you for your review! Your comment has been submitted.');
+    const onSubmit = async (values) => {
+        setIsSubmitting(true);
+        setSubmitMessage(null);
+        try {
+            await postComment(dishId, values.rating, values.author, values.comment);
+            reset();
+            setSubmitMessage({
+                type: 'success',
+                text: 'Thank you for your review! Your comment has been submitted.'
+            });
+        } catch (error) {
+            setSubmitMessage({
+                type: 'error',
+                text: error.message || 'Your comment could not be submitted. Please try again.'
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -101,13 +117,20 @@ const CommentForm = ({ dishId, postComment }) => {
                             {errors.comment && <span className="error-message-sophisticated">{errors.comment.message}</span>}
                         </div>
                         
+                        {submitMessage && (
+                            <div className={`submit-message ${submitMessage.type === 'error' ? 'error-message-sophisticated' : 'success-message-sophisticated'}`}>
+                                {submitMessage.text}
+                            </div>
+                        )}
+
                         <Button 
                             type="submit" 
                             color="warning" 
                             className="submit-button-sophisticated"
+                            disabled={isSubmitting}
                         >
                             <FaPaperPlane className="button-icon" />
-                            <span className="button-text">Submit Review</span>
+                            <span className="button-text">{isSubmitting ? 'Submitting...' : 'Submit Review'}</span>
                         </Button>
                     </form>
                 </ModalBody>
@@ -117,9 +140,11 @@ const CommentForm = ({ dishId, postComment }) => {
 };
 
 function RenderDish({ dish }) {
-    console.log("RenderDish called with dish:", dish);
-    
     if (dish != null) {
+        const averageRating = dish.comments && dish.comments.length > 0
+            ? dish.comments.reduce((sum, comment) => sum + comment.rating, 0) / dish.comments.length
+            : 0;
+
         try {
             return (
                 <Col lg={6} className="dish-detail-col">
@@ -152,21 +177,17 @@ function RenderDish({ dish }) {
                             {dish.comments && dish.comments.length > 0 && (
                                 <div className="dish-rating-sophisticated">
                                     <div className="rating-stars-sophisticated">
-                                        {[...Array(5)].map((_, i) => {
-                                            const avgRating = dish.comments.reduce((sum, comment) => sum + comment.rating, 0) / dish.comments.length;
-                                            return (
-                                                <span key={i} className="star-container">
-                                                    {i < Math.floor(avgRating) ? 
-                                                        <FaStar className="star-filled-sophisticated" /> : 
-                                                        <FaRegStar className="star-empty-sophisticated" />
-                                                    }
-                                                </span>
-                                            );
-                                        })}
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i} className="star-container">
+                                                {i < Math.round(averageRating) ? 
+                                                    <FaStar className="star-filled-sophisticated" /> : 
+                                                    <FaRegStar className="star-empty-sophisticated" />
+                                                }
+                                            </span>
+                                        ))}
                                     </div>
                                     <span className="rating-text-sophisticated">
-                                        {(dish.comments.reduce((sum, comment) => sum + comment.rating, 0) / dish.comments.length).toFixed(1)} 
-                                        ({dish.comments.length} reviews)
+                                        {averageRating.toFixed(1)} ({dish.comments.length} reviews)
                                     </span>
                                 </div>
                             )}
@@ -175,7 +196,6 @@ function RenderDish({ dish }) {
                 </Col>
             );
         } catch (error) {
-            console.error("Error in RenderDish:", error);
             return (
                 <Col lg={6}>
                     <div className="error-container-sophisticated">
@@ -200,8 +220,6 @@ function RenderDish({ dish }) {
 }
 
 function RenderComments({ dish, comments, postComment, dishId }) {
-    console.log("RenderComments called with:", { dish, comments, dishId });
-    
     try {
         // Ensure comments is an array
         const commentsArray = Array.isArray(comments) ? comments : [];
@@ -277,7 +295,6 @@ function RenderComments({ dish, comments, postComment, dishId }) {
                                             
                                             const date = new Date(dateValue);
                                             if (isNaN(date.getTime())) {
-                                                console.error('Invalid date value:', dateValue);
                                                 return 'Date not available';
                                             }
                                             
@@ -287,7 +304,6 @@ function RenderComments({ dish, comments, postComment, dishId }) {
                                                 day: '2-digit'
                                             }).format(date);
                                         } catch (error) {
-                                            console.error('Error formatting date:', error, 'Date value:', comment.date);
                                             return 'Date not available';
                                         }
                                     })()}
@@ -305,7 +321,6 @@ function RenderComments({ dish, comments, postComment, dishId }) {
             </Col>
         );
     } catch (error) {
-        console.error("Error in RenderComments:", error);
         return (
             <Col lg={6}>
                 <div className="error-container-sophisticated">
@@ -319,8 +334,6 @@ function RenderComments({ dish, comments, postComment, dishId }) {
 }
 
 const DishDetail = (props) => {
-    console.log("DishDetail component props:", props);
-    
     if (props.isLoading) {
         return (
             <Container fluid className="dish-detail-container-sophisticated">
@@ -390,7 +403,6 @@ const DishDetail = (props) => {
     }
     else {
         // Default case - should not happen but prevents blank screen
-        console.log("DishDetail: Unexpected state - no conditions met");
         return (
             <Container fluid className="dish-detail-container-sophisticated">
                 <div className="error-container-sophisticated">
