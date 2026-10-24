@@ -6,6 +6,7 @@ import Footer from './FooterComponent';
 import Contact from './ContactComponent';
 import About from './AboutComponent';
 import DishDetail from './DishdetailComponent'
+import Reservations from './ReservationsComponent';
 import { postComment, postFeedback, fetchDishes, fetchPromos, fetchLeaders } from '../redux/ActionCreators';
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -41,6 +42,7 @@ class Main extends Component {
 
       return (
         <Home dish={featuredDish}
+          dishes={this.props.dishes?.dishes || []}
           dishesLoading={this.props.dishes?.isLoading || false}
           dishesErrMess={this.props.dishes?.errMess || null}
           promotion={featuredPromo}
@@ -75,6 +77,7 @@ class Main extends Component {
           <Route exact path="/menu" component={ () => <Menu dishes={this.props.dishes || { dishes: [], isLoading: false, errMess: null }} /> } />
           <Route path="/menu/:dishId" component={ DishWithId } />
           <Route exact path="/contactus" component={ () => <Contact postFeedback={this.props.postFeedback} />} />
+          <Route exact path="/reservations" component={Reservations} />
           <Route exact path="/aboutus" component={ () => <About leaders={this.props.leaders || { leaders: [], isLoading: false, errMess: null }} /> } />
           <Redirect to="/home" />
         </Switch>

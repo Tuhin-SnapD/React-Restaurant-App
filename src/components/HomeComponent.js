@@ -1,251 +1,122 @@
-import React from 'react';
-import { Card, CardImg, CardText, CardBody, CardTitle, CardSubtitle, Button, Badge, Row, Col, Container } from 'reactstrap';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Loading } from './LoadingComponent';
-import { 
-    FaUtensils, 
-    FaStar, 
-    FaUserTie, 
-    FaWineGlass, 
-    FaPalette, 
-    FaRegStar,
-    FaPhone
-} from 'react-icons/fa';
+import { baseUrl } from '../shared/baseUrl';
 
-function RenderCard({ item, isLoading, errMess, type }) {
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <Loading />
-        <h4>Loading {type}...</h4>
+const averageRating = (dishes) => {
+  const reviews = (dishes || []).reduce((all, dish) => all.concat(dish.comments || []), []);
+  if (!reviews.length) return null;
+  return (reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length).toFixed(1);
+};
+
+function FeatureCard({ item, eyebrow, kind, loading, error, to }) {
+  if (loading) return <article className="feature-card feature-card-state"><Loading /><p>Loading {eyebrow.toLowerCase()}…</p></article>;
+  if (error) return <article className="feature-card feature-card-state"><span className="eyebrow">{eyebrow}</span><p className="inline-error">{error}</p></article>;
+  if (!item) return null;
+
+  const content = (
+    <>
+      <div className="feature-image-wrap">
+        <img src={item.image} alt={item.name} loading="lazy" />
+        {item.label && <span className="image-label">{item.label}</span>}
+        {item.price !== undefined && <span className="image-price">${Number(item.price).toFixed(2)}</span>}
       </div>
-    );
-  }
-  else if (errMess) {
-    return (
-      <div className="error-container">
-        <h2>Error</h2>
-        <h4>{errMess}</h4>
+      <div className="feature-card-copy">
+        <span className="eyebrow">{eyebrow}</span>
+        <h3>{item.name}</h3>
+        {kind === 'chef' && item.designation && <p className="feature-designation">{item.designation}</p>}
+        <p>{item.description}</p>
+        {kind === 'dish' && item.comments && item.comments.length > 0 && (
+          <span className="review-summary"><span aria-label="Rated">★</span> {(item.comments.reduce((sum, comment) => sum + Number(comment.rating || 0), 0) / item.comments.length).toFixed(1)} <span>· {item.comments.length} guest reviews</span></span>
+        )}
+        {kind === 'chef' && item.abbr && <span className="review-summary">{item.abbr}</span>}
       </div>
-    );
-  }
-  else if (item) {
-    const getTypeIcon = (type) => {
-      switch(type) {
-        case 'dish':
-          return <FaUtensils className="overlay-icon" />;
-        case 'promotion':
-          return <FaStar className="overlay-icon" />;
-        case 'leader':
-          return <FaUserTie className="overlay-icon" />;
-        default:
-          return <FaUtensils className="overlay-icon" />;
-      }
-    };
+      <span className="feature-arrow" aria-hidden="true">↗</span>
+    </>
+  );
 
-    return (
-      <Card className="elegant-card home-card">
-        {item.label && <Badge className="label-badge">{item.label}</Badge>}
-        <div className="card-image-container">
-          <CardImg src={item.image} alt={item.name} className="card-image" />
-          <div className="card-overlay">
-            <div className="overlay-content">
-              {getTypeIcon(type)}
-            </div>
-          </div>
-        </div>
-        <CardBody className="card-body-sophisticated">
-          <CardTitle className="card-title-sophisticated">{item.name}</CardTitle>
-          {item.designation && <CardSubtitle className="card-subtitle-sophisticated">{item.designation}</CardSubtitle>}
-          <CardText className="card-description-sophisticated">{item.description}</CardText>
-          
-          {item.price && (
-            <div className="price-badge-sophisticated">
-              <span className="price-currency">$</span>
-              <span className="price-amount">{item.price}</span>
-            </div>
-          )}
-          
-          {item.comments && (
-            <div className="rating-stars-sophisticated">
-              {(() => {
-                const average = item.comments.length > 0
-                  ? item.comments.reduce((sum, comment) => sum + comment.rating, 0) / item.comments.length
-                  : 0;
-                return [...Array(5)].map((_, i) => (
-                  <span key={i} className="star-container">
-                    {i < Math.round(average)
-                      ? <FaStar className="star-sophisticated" />
-                      : <FaRegStar className="star-sophisticated" />}
-                  </span>
-                ));
-              })()}
-              <span className="review-count-sophisticated">({item.comments.length} reviews)</span>
-            </div>
-          )}
-          
-
-          
-          {type === 'leader' && (
-            <div className="badge-container-sophisticated">
-              <Badge color="info" className="role-badge-sophisticated">{item.abbr}</Badge>
-              {item.featured && <Badge color="success" className="featured-badge-sophisticated">Featured</Badge>}
-            </div>
-          )}
-        </CardBody>
-      </Card>
-    );
-  }
-  else {
-    return <div></div>;
-  }
+  return to ? <Link className="feature-card" to={to}>{content}</Link> : <article className="feature-card">{content}</article>;
 }
 
 function Home(props) {
+  const [tonight, setTonight] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${baseUrl}restaurant/overview`)
+      .then(response => {
+        if (!response.ok) throw new Error(`Request failed (${response.status})`);
+        return response.json();
+      })
+      .then(data => { if (!cancelled) setTonight(data); })
+      .catch(() => { if (!cancelled) setTonight(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const dishes = props.dishes || [];
+  const categories = new Set(dishes.map((dish) => dish.category).filter(Boolean)).size;
+  const rating = averageRating(dishes);
+  const featuredDish = props.dish;
+
   return (
-    <Container fluid className="home-container-sophisticated">
-      {/* Hero Section */}
-      <Row className="hero-section-sophisticated">
-        <Col>
-          <div className="hero-content-sophisticated">
-            <div className="hero-badge">
-              <FaStar className="hero-badge-icon" />
-              <span className="hero-badge-text">Award-Winning Cuisine</span>
-            </div>
-            <h1 className="hero-title-sophisticated">Welcome to Culinary Excellence</h1>
-            <p className="hero-subtitle-sophisticated">
-              Experience the pinnacle of gastronomic artistry with our award-winning chefs and carefully curated menu 
-              featuring the finest ingredients and innovative techniques that redefine fine dining.
-            </p>
-            <div className="hero-stats">
-              <div className="stat-item">
-                <span className="stat-number">15+</span>
-                <span className="stat-label">Years of Excellence</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">50+</span>
-                <span className="stat-label">Signature Dishes</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">1000+</span>
-                <span className="stat-label">Happy Guests</span>
-              </div>
-            </div>
+    <main className="revamp-page home-page">
+      <section className="home-hero">
+        <div className="hero-copy">
+          <span className="eyebrow hero-eyebrow"><i></i> A table worth lingering at</span>
+          <h1>Good food.<br /><em>Long evenings.</em></h1>
+          <p>Season-led cooking, thoughtful pours, and the kind of welcome that makes dinner feel like an occasion.</p>
+          <div className="hero-actions">
+            <Link className="button button-dark" to="/menu">Explore the menu <span aria-hidden="true">↗</span></Link>
+            <Link className="text-link" to="/contactus">Plan your visit <span aria-hidden="true">→</span></Link>
           </div>
-        </Col>
-      </Row>
+          <div className="live-note"><span className="live-dot"></span> Discover what’s on our menu today</div>
+        </div>
+        <div className="hero-visual">
+          <div className="hero-photo-frame">
+            {featuredDish && <img src={featuredDish.image} alt={featuredDish.name} />}
+            {!featuredDish && <div className="hero-photo-placeholder">L'Étoile <span>Seasonal dining</span></div>}
+          </div>
+          {featuredDish && <Link className="hero-dish-note" to={`/menu/${featuredDish._id}`}>
+            <span className="eyebrow">From the kitchen · {featuredDish.category}</span>
+            <strong>{featuredDish.name}</strong>
+            <span className="hero-note-bottom">{featuredDish.label || 'Featured dish'} <span>${Number(featuredDish.price).toFixed(2)}</span></span>
+          </Link>}
+          <span className="hero-stamp" aria-hidden="true">MADE<br />WITH<br /><b>CARE</b></span>
+        </div>
+      </section>
 
-      {/* Featured Content */}
-      <Container>
-        <Row className="featured-section">
-          <Col>
-            <div className="section-header">
-              <h2 className="section-title">Our Signature Offerings</h2>
-              <p className="section-subtitle">
-                Discover the artistry behind our most celebrated dishes, exclusive promotions, and the culinary masters who bring them to life.
-              </p>
-            </div>
-          </Col>
-        </Row>
-        
-        <Row className="featured-content-sophisticated">
-          <Col lg={4} md={6} className="mb-4">
-            <RenderCard 
-              item={props.dish} 
-              isLoading={props.dishesLoading} 
-              errMess={props.dishesErrMess} 
-              type="dish" 
-            />
-          </Col>
-          <Col lg={4} md={6} className="mb-4">
-            <RenderCard 
-              item={props.promotion} 
-              isLoading={props.promosLoading} 
-              errMess={props.promosErrMess} 
-              type="promotion" 
-            />
-          </Col>
-          <Col lg={4} md={6} className="mb-4">
-            <RenderCard 
-              item={props.leader} 
-              isLoading={props.leadersLoading} 
-              errMess={props.leadersErrMess} 
-              type="leader" 
-            />
-          </Col>
-        </Row>
+      <section className="proof-strip" aria-label="Live restaurant data">
+        <div><strong>{props.dishesLoading ? '—' : dishes.length}</strong><span>Dishes on the menu</span></div>
+        <div><strong>{props.dishesLoading ? '—' : categories}</strong><span>Kitchen categories</span></div>
+        <div><strong>{props.dishesLoading ? '—' : rating || '—'}</strong><span>Average guest rating</span></div>
+        <div className="proof-note">Made for sharing<br />and staying awhile.</div>
+      </section>
 
-        {/* Experience Section */}
-        <Row className="experience-section">
-          <Col lg={6} className="experience-content">
-            <h2 className="experience-title">The L'Étoile Experience</h2>
-            <p className="experience-description">
-              From the moment you step through our doors, you're transported to a world where every detail matters. 
-              Our commitment to excellence extends beyond the plate to create an unforgettable dining journey.
-            </p>
-            <div className="experience-features">
-              <div className="feature-item">
-                <FaWineGlass className="feature-icon" />
-                <div className="feature-content">
-                  <h4>Curated Wine Selection</h4>
-                  <p>Expertly paired wines from renowned vineyards worldwide</p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <FaPalette className="feature-icon" />
-                <div className="feature-content">
-                  <h4>Artistic Presentation</h4>
-                  <p>Every dish is a masterpiece of visual and culinary artistry</p>
-                </div>
-              </div>
-              <div className="feature-item">
-                <FaStar className="feature-icon" />
-                <div className="feature-content">
-                  <h4>Impeccable Service</h4>
-                  <p>Attentive, knowledgeable staff dedicated to your satisfaction</p>
-                </div>
-              </div>
-            </div>
-          </Col>
-          <Col lg={6} className="experience-visual">
-            <div className="experience-image-container">
-              <img 
-                src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop" 
-                alt="Fine Dining Experience" 
-                className="experience-image"
-              />
-              <div className="experience-overlay">
-                <div className="overlay-text">
-                  <span className="overlay-quote">"Culinary artistry at its finest"</span>
-                  <span className="overlay-author">- Food & Wine Magazine</span>
-                </div>
-              </div>
-            </div>
-          </Col>
-        </Row>
+      <section className="tonight-snapshot" aria-label="Tonight's live seating availability">
+        <div className="tonight-snapshot-intro"><span className="eyebrow">TONIGHT AT L'ÉTOILE</span><strong>{tonight ? (tonight.serviceStatus === 'open' ? 'Dinner service is underway' : (tonight.serviceStatus === 'upcoming' ? 'Dinner service starts at 17:00' : 'Dinner service has ended')) : 'Checking the dinner service'}</strong></div>
+        <div><span>Next available seating</span><strong>{tonight ? (tonight.nextAvailableTime || 'Fully booked') : '—'}</strong></div>
+        <div><span>Seatings with room</span><strong>{tonight ? tonight.openSeatings : '—'}</strong></div>
+        <div><span>Seats across open times</span><strong>{tonight ? tonight.remainingSeatCapacity : '—'}</strong></div>
+        <Link to="/reservations">See live availability <span aria-hidden="true">→</span></Link>
+      </section>
 
-        {/* Call to Action Section */}
-        <Row className="cta-section-sophisticated">
-          <Col>
-            <div className="cta-content-sophisticated">
-              <div className="cta-header">
-                <h2 className="cta-title">Ready to Experience Fine Dining?</h2>
-                <p className="cta-subtitle">
-                  Join us for an unforgettable culinary journey. Book your table today and discover 
-                  why we're the city's most celebrated restaurant.
-                </p>
-              </div>
-                <div className="cta-buttons-sophisticated">
-                    <Button tag={Link} to="/contactus" color="warning" size="lg" className="cta-button-primary">
-                        <FaPhone className="button-icon" />
-                        <span className="button-text">Contact Us to Reserve</span>
-                    </Button>
-                </div>
-            </div>
-          </Col>
-        </Row>
-      </Container>
-    </Container>
+      <section className="home-featured section-wrap">
+        <div className="section-heading">
+          <div><span className="eyebrow">A little of what we do</span><h2>On the table</h2></div>
+          <Link className="text-link" to="/menu">See the full menu <span aria-hidden="true">→</span></Link>
+        </div>
+        <div className="feature-grid">
+          <FeatureCard item={props.dish} eyebrow="From the kitchen" kind="dish" loading={props.dishesLoading} error={props.dishesErrMess} to={props.dish ? `/menu/${props.dish._id}` : null} />
+          <FeatureCard item={props.promotion} eyebrow="A special for you" kind="promotion" loading={props.promosLoading} error={props.promosErrMess} />
+          <FeatureCard item={props.leader} eyebrow="The people behind it" kind="chef" loading={props.leadersLoading} error={props.leadersErrMess} />
+        </div>
+      </section>
+
+      <section className="home-invitation">
+        <div><span className="eyebrow">An evening at L'Étoile</span><h2>Come hungry.<br /><em>Leave happy.</em></h2></div>
+        <div className="invitation-copy"><p>Take a look at what’s cooking, find a new favorite, and get in touch when you’re ready to join us.</p><Link className="button button-light" to="/contactus">Make an enquiry <span aria-hidden="true">↗</span></Link></div>
+      </section>
+    </main>
   );
 }
 

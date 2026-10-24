@@ -1,77 +1,50 @@
-import React, { Component } from 'react';
-import { Navbar, NavbarBrand, Nav, NavbarToggler, Collapse, NavItem } from 'reactstrap';
-import { NavLink } from 'react-router-dom';
-import { 
-    FaHome, 
-    FaInfoCircle, 
-    FaUtensils, 
-    FaPhone
-} from 'react-icons/fa';
+import React, { useState } from 'react';
+import { Link, NavLink, useHistory } from 'react-router-dom';
 
-class Header extends Component {
-    constructor(props) {
-        super(props);
-    
-        this.toggleNav = this.toggleNav.bind(this);
+const Header = () => {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const history = useHistory();
 
-        this.state = {
-          isNavOpen: false
-        };
-      }
+    const searchMenu = (event) => {
+        event.preventDefault();
+        history.push(`/menu${query.trim() ? `?search=${encodeURIComponent(query.trim())}` : ''}`);
+        setSearchOpen(false);
+        setMenuOpen(false);
+    };
 
-      toggleNav() {
-        this.setState({
-          isNavOpen: !this.state.isNavOpen
-        });
-      }
+    const closeMenu = () => setMenuOpen(false);
 
-    render() {
-        return(
-            <div>
-                <Navbar dark expand="md" className="navbar-sophisticated">
-                    <div className="container">
-                        <NavbarToggler onClick={this.toggleNav} className="navbar-toggler-custom" />
-                        <NavbarBrand className="navbar-brand-sophisticated" href="/">
-                            <div className="brand-container">
-                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=120&h=60&fit=crop" 
-                                     height="40" width="50" alt="L'Etoile Restaurant" 
-                                     className="brand-logo" />
-                                <span className="brand-text">L'Étoile</span>
-                            </div>
-                        </NavbarBrand>
-                        <Collapse isOpen={this.state.isNavOpen} navbar className="navbar-collapse-sophisticated">
-                            <Nav navbar className="navbar-nav-sophisticated">
-                                <NavItem>
-                                    <NavLink className="nav-link-sophisticated" to='/home'>
-                                        <FaHome className="nav-icon" />
-                                        <span className="nav-text">Home</span>
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className="nav-link-sophisticated" to='/aboutus'>
-                                        <FaInfoCircle className="nav-icon" />
-                                        <span className="nav-text">About Us</span>
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className="nav-link-sophisticated" to='/menu'>
-                                        <FaUtensils className="nav-icon" />
-                                        <span className="nav-text">Menu</span>
-                                    </NavLink>
-                                </NavItem>
-                                <NavItem>
-                                    <NavLink className="nav-link-sophisticated" to='/contactus'>
-                                        <FaPhone className="nav-icon" />
-                                        <span className="nav-text">Contact Us</span>
-                                    </NavLink>
-                                </NavItem>
-                            </Nav>
-                        </Collapse>
-                    </div>
-                </Navbar>
+    return (
+        <header className="site-header">
+            <div className="site-header-inner">
+                <Link className="brand-lockup" to="/home" onClick={closeMenu} aria-label="L'Étoile home">
+                    <span className="brand-mark" aria-hidden="true">L<span>·</span>E</span>
+                    <span className="brand-copy"><strong>L'Étoile</strong><small>KITCHEN · DINING · SERVICE</small></span>
+                </Link>
+                <button className="mobile-menu-toggle" type="button" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>
+                    <span></span><span></span>
+                </button>
+                <nav className={`site-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Main navigation">
+                    <NavLink exact to="/home" activeClassName="is-active" onClick={closeMenu}>Home</NavLink>
+                    <NavLink to="/menu" activeClassName="is-active" onClick={closeMenu}>Menu</NavLink>
+                    <NavLink to="/aboutus" activeClassName="is-active" onClick={closeMenu}>Our team</NavLink>
+                    <NavLink to="/contactus" activeClassName="is-active" onClick={closeMenu}>Visit us</NavLink>
+                    <button className="header-search-toggle" type="button" aria-label="Search the menu" aria-expanded={searchOpen} onClick={() => setSearchOpen(!searchOpen)}>
+                        <span className="search-glyph" aria-hidden="true"></span>
+                    </button>
+                    <Link className="header-reserve" to="/reservations" onClick={closeMenu}>Reserve a table <span aria-hidden="true">↗</span></Link>
+                </nav>
             </div>
-        );
-    }
-}
+            {searchOpen && (
+                <form className="header-search-panel" onSubmit={searchMenu}>
+                    <label htmlFor="header-menu-search">Find something on the menu</label>
+                    <div><input id="header-menu-search" autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try truffle, dessert, or mains" /><button type="submit">Search menu <span aria-hidden="true">→</span></button></div>
+                </form>
+            )}
+        </header>
+    );
+};
 
 export default Header;

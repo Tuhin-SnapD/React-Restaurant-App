@@ -1,243 +1,97 @@
-import React, { useState } from 'react';
-import {
-    Card, CardImg,
-    CardTitle, Breadcrumb, BreadcrumbItem, CardBody, CardText, Badge,
-    Row, Col, Container, Button, CardSubtitle
-} from 'reactstrap';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Loading } from './LoadingComponent';
-import { 
-    FaEye, 
-    FaUtensils, 
-    FaDrumstickBite, 
-    FaBirthdayCake, 
-    FaSearch, 
-    FaStar,
-    FaRegStar
-} from 'react-icons/fa';
 
-function RenderMenuItem({ dish, onClick }) {
-    const averageRating = dish.comments && dish.comments.length > 0 
-        ? (dish.comments.reduce((sum, comment) => sum + comment.rating, 0) / dish.comments.length).toFixed(1)
-        : 0;
-
-    const getCategoryIcon = (category) => {
-        switch(category) {
-            case 'appetizer':
-                return <FaUtensils className="category-icon" />;
-            case 'mains':
-                return <FaDrumstickBite className="category-icon" />;
-            case 'dessert':
-                return <FaBirthdayCake className="category-icon" />;
-            default:
-                return <FaUtensils className="category-icon" />;
-        }
-    };
-
-    return (
-        <Card className="menu-card-sophisticated elegant-card">
-            <Link to={`/menu/${dish._id}`} className="menu-link-sophisticated">
-                <div className="image-container-sophisticated">
-                    <CardImg src={dish.image} alt={dish.name} className="menu-image-sophisticated" />
-                    {dish.label && <Badge className="label-badge-sophisticated">{dish.label}</Badge>}
-                    {dish.featured && <Badge className="featured-badge-sophisticated">Featured</Badge>}
-                    <div className="menu-overlay-sophisticated">
-                        <div className="overlay-content-sophisticated">
-                            <FaEye className="overlay-icon-sophisticated" />
-                            <span className="overlay-text-sophisticated">View Details</span>
-                        </div>
-                    </div>
-                </div>
-            </Link>
-            <CardBody className="menu-body-sophisticated">
-                <CardSubtitle className="menu-category-sophisticated">
-                    {getCategoryIcon(dish.category)}
-                    <span className="category-text">{dish.category}</span>
-                </CardSubtitle>
-                <CardTitle className="menu-title-sophisticated">{dish.name}</CardTitle>
-                <CardText className="menu-description-sophisticated">{dish.description}</CardText>
-                <div className="menu-footer-sophisticated">
-                    <div className="price-badge-sophisticated">
-                        <span className="price-currency-sophisticated">$</span>
-                        <span className="price-amount-sophisticated">{dish.price}</span>
-                    </div>
-                    <div className="rating-container-sophisticated">
-                        <div className="rating-stars-sophisticated">
-                            {[...Array(5)].map((_, i) => (
-                                <span key={i} className="star-container">
-                                    {i < Math.floor(averageRating) ? 
-                                        <FaStar className="star-filled-sophisticated" /> : 
-                                        <FaRegStar className="star-empty-sophisticated" />
-                                    }
-                                </span>
-                            ))}
-                        </div>
-                        <span className="rating-text-sophisticated">
-                            {averageRating} ({dish.comments?.length || 0} reviews)
-                        </span>
-                    </div>
-                </div>
-            </CardBody>
-        </Card>
-    );
-}
-
-const categoryMeta = {
-    appetizer: { name: 'Appetizers', icon: <FaUtensils /> },
-    mains: { name: 'Main Courses', icon: <FaDrumstickBite /> },
-    dessert: { name: 'Desserts', icon: <FaBirthdayCake /> },
-    beverage: { name: 'Beverages', icon: <FaUtensils /> }
+const categoryLabels = {
+  appetizer: 'Small plates',
+  mains: 'Mains',
+  dessert: 'Dessert',
+  beverage: 'Drinks'
 };
 
-const Menu = (props) => {
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const allDishes = props.dishes.dishes || [];
+const ratingFor = (dish) => {
+  const reviews = dish.comments || [];
+  if (!reviews.length) return null;
+  return reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length;
+};
 
-    const categories = [
-        { id: 'all', name: 'All Dishes', icon: <FaUtensils /> },
-        ...Array.from(new Set(allDishes.map(dish => dish.category))).map(category => ({
-            id: category,
-            name: (categoryMeta[category] || { name: category }).name,
-            icon: (categoryMeta[category] || { icon: <FaUtensils /> }).icon
-        }))
-    ];
-
-    const filteredDishes = selectedCategory === 'all'
-        ? allDishes
-        : allDishes.filter(dish => dish.category === selectedCategory);
-
-    const ratedDishes = allDishes.filter(dish => dish.comments && dish.comments.length > 0);
-    const averageRating = ratedDishes.length > 0
-        ? (ratedDishes.reduce((total, dish) =>
-            total + dish.comments.reduce((sum, comment) => sum + comment.rating, 0) / dish.comments.length, 0
-          ) / ratedDishes.length).toFixed(1)
-        : '0.0';
-
-    const menu = filteredDishes.map((dish) => {
-        return (
-            <Col key={dish._id} lg={4} md={6} className="mb-4">
-                <RenderMenuItem dish={dish} />
-            </Col>
-        );
-    });
-
-    if (props.dishes.isLoading) {
-        return (
-            <Container>
-                <div className="loading-container-sophisticated">
-                    <Loading />
-                    <h4>Loading our delicious menu...</h4>
-                </div>
-            </Container>
-        );
-    }
-    else if (props.dishes.errMess) {
-        return (
-            <Container>
-                <div className="error-container-sophisticated">
-                    <h2>Error</h2>
-                    <h4>{props.dishes.errMess}</h4>
-                </div>
-            </Container>
-        );
-    }
-    else {
-        return (
-            <Container fluid className="menu-container-sophisticated">
-                {/* Hero Section */}
-                <Row className="menu-hero-sophisticated">
-                    <Col>
-                        <div className="hero-content-sophisticated">
-                            <div className="hero-badge-sophisticated">
-                                <FaStar className="hero-badge-icon-sophisticated" />
-                                <span className="hero-badge-text-sophisticated">Culinary Excellence</span>
-                            </div>
-                            <h1 className="hero-title-sophisticated">Our Culinary Creations</h1>
-                            <p className="hero-subtitle-sophisticated">
-                                Discover our carefully curated selection of dishes, each crafted with the finest 
-                                ingredients and executed with precision by our award-winning culinary team.
-                            </p>
-                            <div className="hero-stats-sophisticated">
-                                <div className="stat-item-sophisticated">
-                                    <span className="stat-number-sophisticated">{allDishes.length}</span>
-                                    <span className="stat-label-sophisticated">Signature Dishes</span>
-                                </div>
-                                <div className="stat-item-sophisticated">
-                                    <span className="stat-number-sophisticated">{averageRating}</span>
-                                    <span className="stat-label-sophisticated">Average Rating</span>
-                                </div>
-                                <div className="stat-item-sophisticated">
-                                    <span className="stat-number-sophisticated">{categories.length - 1}</span>
-                                    <span className="stat-label-sophisticated">Categories</span>
-                                </div>
-                            </div>
-                        </div>
-                    </Col>
-                </Row>
-
-                <Container>
-                    {/* Breadcrumb */}
-                    <Row className="mb-4">
-                        <Col>
-                            <Breadcrumb className="breadcrumb-sophisticated">
-                                <BreadcrumbItem><Link to="/home" className="breadcrumb-link-sophisticated">Home</Link></BreadcrumbItem>
-                                <BreadcrumbItem active className="breadcrumb-active-sophisticated">Menu</BreadcrumbItem>
-                            </Breadcrumb>
-                        </Col>
-                    </Row>
-
-                    {/* Category Filter */}
-                    <Row className="mb-4">
-                        <Col>
-                            <div className="filter-section-sophisticated">
-                                <h4 className="filter-title-sophisticated">
-                                    <FaSearch className="filter-icon" />
-                                    Filter by Category
-                                </h4>
-                                <div className="category-buttons-sophisticated">
-                                    {categories.map(category => (
-                                        <Button
-                                            key={category.id}
-                                            color={selectedCategory === category.id ? 'warning' : 'outline-secondary'}
-                                            onClick={() => setSelectedCategory(category.id)}
-                                            className={`category-button-sophisticated ${selectedCategory === category.id ? 'active' : ''}`}
-                                        >
-                                            <span className="category-button-icon">{category.icon}</span>
-                                            <span className="category-button-text">{category.name}</span>
-                                        </Button>
-                                    ))}
-                                </div>
-                                <div className="results-count-sophisticated">
-                                    Showing {filteredDishes.length} of {allDishes.length} dishes
-                                </div>
-                            </div>
-                        </Col>
-                    </Row>
-
-                    {/* Menu Grid */}
-                    <Row className="menu-grid-sophisticated">
-                        {menu}
-                    </Row>
-
-                    {/* Call to Action */}
-                    <Row className="menu-cta-sophisticated">
-                        <Col>
-                            <div className="cta-content-sophisticated">
-                                <h3 className="cta-title-sophisticated">Need help choosing?</h3>
-                                <p className="cta-subtitle-sophisticated">
-                                    Our expert staff is here to guide you through our menu and create the perfect dining experience.
-                                </p>
-                                <Button tag={Link} to="/contactus" color="warning" size="lg" className="cta-button-sophisticated">
-                                    <FaSearch className="button-icon" />
-                                    <span className="button-text">Ask Us for a Recommendation</span>
-                                </Button>
-                            </div>
-                        </Col>
-                    </Row>
-                </Container>
-            </Container>
-        );
-    }
+function DishCard({ dish }) {
+  const rating = ratingFor(dish);
+  return (
+    <article className="menu-dish-card">
+      <Link className="menu-dish-image" to={`/menu/${dish._id}`} aria-label={`View ${dish.name}`}>
+        {dish.image ? <img src={dish.image} alt={dish.name} loading="lazy" /> : <span className="menu-image-fallback">L'Étoile</span>}
+        {dish.label && <span className="image-label">{dish.label}</span>}
+        {dish.featured && <span className="dish-featured-mark">★ Featured</span>}
+      </Link>
+      <div className="menu-dish-body">
+        <div className="menu-dish-kicker"><span>{categoryLabels[dish.category] || dish.category}</span><strong>${Number(dish.price).toFixed(2)}</strong></div>
+        <h3><Link to={`/menu/${dish._id}`}>{dish.name}</Link></h3>
+        <p>{dish.description}</p>
+        <div className="menu-dish-footer">
+          {rating === null ? <span className="no-rating">Be the first to review</span> : <span className="review-summary"><span aria-label={`${rating.toFixed(1)} out of 5`}>★</span> {rating.toFixed(1)} <span>· {dish.comments.length} {dish.comments.length === 1 ? 'review' : 'reviews'}</span></span>}
+          <Link to={`/menu/${dish._id}`} aria-label={`View details for ${dish.name}`}>View dish <span aria-hidden="true">↗</span></Link>
+        </div>
+      </div>
+    </article>
+  );
 }
+
+const Menu = ({ dishes = { dishes: [], isLoading: false, errMess: null } }) => {
+  const location = useLocation();
+  const [query, setQuery] = useState(new URLSearchParams(location.search).get('search') || '');
+  const [category, setCategory] = useState('all');
+  const [sort, setSort] = useState('featured');
+  const allDishes = dishes.dishes || [];
+
+  useEffect(() => {
+    setQuery(new URLSearchParams(location.search).get('search') || '');
+  }, [location.search]);
+
+  const categories = useMemo(() => ['all', ...Array.from(new Set(allDishes.map((dish) => dish.category).filter(Boolean)))], [allDishes]);
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const result = allDishes.filter((dish) => {
+      const inCategory = category === 'all' || dish.category === category;
+      const inSearch = !needle || [dish.name, dish.description, dish.category, dish.label].filter(Boolean).some((value) => value.toLowerCase().includes(needle));
+      return inCategory && inSearch;
+    });
+    return result.sort((a, b) => {
+      if (sort === 'price-low') return Number(a.price) - Number(b.price);
+      if (sort === 'price-high') return Number(b.price) - Number(a.price);
+      if (sort === 'rating') return (ratingFor(b) || 0) - (ratingFor(a) || 0);
+      return Number(b.featured) - Number(a.featured) || a.name.localeCompare(b.name);
+    });
+  }, [allDishes, category, query, sort]);
+
+  const reviews = allDishes.reduce((all, dish) => all.concat(dish.comments || []), []);
+  const average = reviews.length ? (reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length).toFixed(1) : null;
+
+  if (dishes.isLoading) return <main className="revamp-page menu-page"><div className="menu-loading"><Loading /><p>Gathering the latest from our kitchen…</p></div></main>;
+  if (dishes.errMess) return <main className="revamp-page menu-page"><div className="menu-error"><span className="eyebrow">The kitchen is just out of reach</span><h1>We couldn’t load the menu.</h1><p>{dishes.errMess}</p></div></main>;
+
+  return (
+    <main className="revamp-page menu-page">
+      <section className="menu-intro">
+        <div className="menu-intro-copy"><span className="eyebrow">Thoughtfully made, happily shared</span><h1>Our <em>menu.</em></h1><p>Take your time. Every plate is made to order, with the best of what the kitchen has on hand.</p></div>
+        <div className="menu-intro-aside"><span className="menu-aside-mark" aria-hidden="true">L·E</span><span>{allDishes.length} dishes<br />{categories.length - 1} kitchen categories</span></div>
+      </section>
+
+      <section className="menu-toolbar" aria-label="Menu filters">
+        <div className="menu-search-wrap"><label htmlFor="menu-search">Find a dish</label><div className="menu-search"><span className="search-glyph" aria-hidden="true"></span><input id="menu-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search dishes, descriptions, or labels" /></div></div>
+        <label className="menu-sort-wrap" htmlFor="menu-sort">Sort by<select id="menu-sort" value={sort} onChange={(event) => setSort(event.target.value)}><option value="featured">Featured first</option><option value="rating">Top rated</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option></select></label>
+      </section>
+
+      <div className="menu-category-row" role="group" aria-label="Filter by category">
+        {categories.map((item) => <button key={item} type="button" className={`category-chip ${category === item ? 'selected' : ''}`} aria-pressed={category === item} onClick={() => setCategory(item)}>{item === 'all' ? 'Everything' : categoryLabels[item] || item}</button>)}
+        <span className="menu-result-count">{filtered.length} {filtered.length === 1 ? 'dish' : 'dishes'}</span>
+      </div>
+
+      {filtered.length ? <section className="menu-dish-grid" aria-label="Dishes">{filtered.map((dish) => <DishCard key={dish._id} dish={dish} />)}</section> : <section className="menu-empty"><span className="eyebrow">Nothing on this plate</span><h2>No dishes match those filters.</h2><p>Try another search or show the whole menu.</p><button className="button button-dark" type="button" onClick={() => { setQuery(''); setCategory('all'); }}>Clear filters</button></section>}
+
+      <div className="menu-live-summary"><span><strong>{allDishes.filter((dish) => dish.featured).length}</strong> featured in the kitchen</span><span><strong>{average || '—'}</strong> average guest rating</span><span><strong>{reviews.length}</strong> guest reviews</span></div>
+    </main>
+  );
+};
 
 export default Menu;
